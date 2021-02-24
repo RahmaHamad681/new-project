@@ -17,17 +17,14 @@ const orderSchema = new mongoose.Schema({
             }
         }
     ],
-    orderStatus: [
-        {
-          type: {
+    orderStatus: { 
             type: String,
             enum: ["ordered", "packed", "shipped", "delivered"],
             default: "ordered",
-          },
-          date: {type: Date,},
-          isCompleted: {type: Boolean, default: false},
+            // isCompleted: {type: Boolean, default: false},
         },
-    ],
+    date: {type: Date},
+
 },{
     timestamps: true
 })

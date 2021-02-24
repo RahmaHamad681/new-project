@@ -63,7 +63,7 @@ router.post('/logout', auth, async(req, res)=>{
            data: e.message
        }) 
     }
-} )
+})
 //log out from all
 router.post('/logoutAll', auth, async(req, res)=>{
     try{
@@ -158,6 +158,7 @@ router.post('/user/changePassword', auth, async(req, res)=>{
 //     })
 //     }catch(e){res.send(e.message)}
 // })
+
 //edit special attr in user
 router.patch('/user/me', auth, async(req, res)=>{
     const allowedUpdates = ['name', 'phone', 'address']

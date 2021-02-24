@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const validator = require('validator')
-const Order = require('./order.model')
+const Order = require('./orders.model')
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
         match:/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$/,
         required: [true, 'Please enter a password'],
         minlength: [6, 'Password must be at least 6 characters'],
-        maxlength: [20, 'Password must be at most 20 characters'],
+        maxlength: [200, 'Password must be at most 20 characters'],
     },
     email:{
         type:String,
@@ -42,33 +42,32 @@ const userSchema = new mongoose.Schema({
         min: 10,
         max: 100,
       },
-    //   image:{
-    //     type:String,
-    //     trim:true
-    //  },
+      image:{
+        type:String,
+        trim:true
+     },
       role:{
           type:String,
           enum:['Admin', 'delivery', 'user'],
           required: true,
           trim:true
       },
+    // role_id:{  
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     default: null,
+    //     ref:'Role'        
+    // },
       status:{
         type:Boolean, 
         default:false
     },
-    // tokens:[
-    //     {
-    //         token: { type:String } 
-    //     }
-    // ]
+    tokens:[
+        {
+            token: { type:String } 
+        }
+    ]
 },{
     timestamps:true
-})
-//virtual relation
-userSchema.virtual('myOrder', {
-    ref: 'Order',
-    localField: '_id',
-    foreignField: 'user_id'
 })
 //handle json data
 userSchema.methods.toJSON = function(){
@@ -93,18 +92,24 @@ userSchema.methods.generateToken = async function(){
     return token
 }
 //remove order for user
-// userSchema.pre('remove', async function(next){
-//     const user = this
-//     await Order.deleteMany({user_id: user._id})
-//     next()
-// })
+userSchema.pre('remove', async function(next){
+    const user = this
+    await Order.deleteMany({user_id: user._id})
+    next()
+})
 //login
 userSchema.statics.findUserByCredentials = async (email,password)=>{
     const user = await User.findOne({email})
-    if(!user) throw new Error('invalid email')
+    if(!user) throw new Error('email not found/invalid')
     flag = await bcrypt.compare(password, user.password)
     if(!flag) throw new Error('invalid password')
     return user
 }
+//virtual relation
+userSchema.virtual('orders', {
+    ref: 'Order',
+    localField: '_id',
+    foreignField: 'user_id'
+})
 const User = mongoose.model('User', userSchema)
 module.exports =User
